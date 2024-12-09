@@ -50,7 +50,24 @@ Finally, line 73 has no effect in this code, but is kept for convenience. Whenev
 
 The processing time of the elementwise sum has been 0.0014ms.
 
-<script src="https://gist.github.com/CIuliusC/3df23d3eff81a7176ccccf478c6f941a#file-vectorsum_v1-py.js"></script>
+<script>
+import numpy as np
+
+# --- PyCUDA initialization
+import pycuda.driver as cuda
+import pycuda.autoinit
+from pycuda.compiler import SourceModule
+
+###################
+# iDivUp FUNCTION #
+###################
+def iDivUp(a, b):
+    return a // b + 1
+
+########
+# MAIN #
+########
+</script>
 
 ---
 
