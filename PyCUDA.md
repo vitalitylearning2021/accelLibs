@@ -25,7 +25,7 @@ To form the five examples, we will consider different possibilities offered by P
 
 Different possibilities may have different performance. For this reason, we will assess the performance of each version by the execution times on a Google Colab's Tesla T4 GPU.
 
-#Version 1: using `SourceModule`#
+#Version 1: using `SourceModule`
 The module SourceModule enables coding GPU processing directly using CUDA __global__ functions and to execute the kernels by specifying the launch grid.
 
 In the code below, SourceModule is imported at line 6.
