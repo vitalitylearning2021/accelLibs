@@ -50,10 +50,7 @@ Finally, line 73 has no effect in this code, but is kept for convenience. Whenev
 
 The processing time of the elementwise sum has been 0.0014ms.
 
-```python
-# Example Python code
-for i in range(10):
-    print(i)
+<script src="https://gist.github.com/CIuliusC/3df23d3eff81a7176ccccf478c6f941a#file-vectorsum_v1-py.js"></script>
 
 ---
 
