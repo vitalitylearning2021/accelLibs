@@ -1,4 +1,17 @@
-PyCUDA
+<script type="text/javascript">
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+  }
+};
+</script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js">
+</script>
+
+##PyCUDA##
+
 PyCUDA is a very useful tool to embed low level programming on Graphics Processing Units (GPUs) with CUDA in a higher level programming framework provided by Python. It makes available a whole bunch of facilities to perform a step-by-step code debugging by checking intermediate variable values using breakpoints, simple prints, plots of vectors or images of matrices. In its interactive shell version, for example using Jupyter notebook, PyCUDA coding is even simpler. Jupyter is however just a possibility to be exploited locally, but free on line services also exist, like Kaggle or Google Colaboratory.
 
 Coding with PyCUDA occurs without significant loss of performance due to the use of a high lever language. Indeed, acceleration using GPU parallel programming occurs by splitting the code into a sequential or mildly parallelizable part to be executed on a (possibly multicore) CPU and into a massively parallelizable part to be executed on GPU. Typically, the CPU is just a controller which schedules the GPU executions so that there is no significant penalty when using Python. Opposite to that, GPU coding can be worked out directly using CUDA.
