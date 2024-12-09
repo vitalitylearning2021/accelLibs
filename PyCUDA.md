@@ -1,15 +1,3 @@
-<script type="text/javascript">
-MathJax = {
-  tex: {
-    inlineMath: [['$', '$'], ['\\(', '\\)']],
-    displayMath: [['$$', '$$'], ['\\[', '\\]']],
-  }
-};
-</script>
-<script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js">
-</script>
-
 ##PyCUDA##
 
 PyCUDA is a very useful tool to embed low level programming on Graphics Processing Units (GPUs) with CUDA in a higher level programming framework provided by Python. It makes available a whole bunch of facilities to perform a step-by-step code debugging by checking intermediate variable values using breakpoints, simple prints, plots of vectors or images of matrices. In its interactive shell version, for example using Jupyter notebook, PyCUDA coding is even simpler. Jupyter is however just a possibility to be exploited locally, but free on line services also exist, like Kaggle or Google Colaboratory.
