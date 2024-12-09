@@ -1,6 +1,6 @@
 ---
 layout: default
-title: About
+title: Five different ways to sum vectors in PyCUDA
 ---
 
 PyCUDA is a very useful tool to embed low level programming on Graphics Processing Units (GPUs) with CUDA in a higher level programming framework provided by Python. It makes available a whole bunch of facilities to 
