@@ -19,9 +19,9 @@ Basics of CUDA programming and of Python coding will be assumed. CUDA basics pre
 
 To form the five examples, we will consider different possibilities offered by PyCUDA, namely, using:
 
-the `SourceModule` module;
-the `ElementwiseKernel` module;
-the elementwise sum of two `gpuarray`’s.
+- the `SourceModule` module;
+- the `ElementwiseKernel` module;
+- the elementwise sum of two `gpuarray`’s.
 
 Different possibilities may have different performance. For this reason, we will assess the performance of each version by the execution times on a Google Colab's Tesla T4 GPU.
 
