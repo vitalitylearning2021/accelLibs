@@ -50,7 +50,7 @@ Finally, line 73 has no effect in this code, but is kept for convenience. Whenev
 
 The processing time of the elementwise sum has been 0.0014ms.
 
-<script src="[https://gist.github.com/exampleuser/abcdef1234567890.js](https://gist.githubusercontent.com/CIuliusC/3df23d3eff81a7176ccccf478c6f941a/raw/53cf74e04be2b9534b0a05dd9d2ebd91f5b95760/vectorSum_v1.py)"></script>
+<script src="https://gist.githubusercontent.com/CIuliusC/3df23d3eff81a7176ccccf478c6f941a/raw/53cf74e04be2b9534b0a05dd9d2ebd91f5b95760/vectorSum_v1.py"></script>
 
 Version 1 using SourceModule
 Version 2: using SourceModule and copying data from host to device on-the-fly
