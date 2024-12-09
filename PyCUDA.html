@@ -1,26 +1,32 @@
 ---
-title: Acceleration Libraries for CUDA
+title: Five different ways to sum vectors in PyCUDA
 ---
 
 ##PyCUDA##
 
-PyCUDA is a very useful tool to embed low level programming on Graphics Processing Units (GPUs) with CUDA in a higher level programming framework provided by Python. It makes available a whole bunch of facilities to perform a step-by-step code debugging by checking intermediate variable values using breakpoints, simple prints, plots of vectors or images of matrices. In its interactive shell version, for example using Jupyter notebook, PyCUDA coding is even simpler. Jupyter is however just a possibility to be exploited locally, but free on line services also exist, like Kaggle or Google Colaboratory.
+PyCUDA is a very useful tool to embed low level programming on Graphics Processing Units (GPUs) with CUDA in a higher level programming framework provided by Python. It makes available a whole bunch of facilities to 
+perform a step-by-step code debugging by checking intermediate variable values using breakpoints, simple prints, plots of vectors or images of matrices. In its interactive shell version, for example using Jupyter notebook, 
+PyCUDA coding is even simpler. Jupyter is however just a possibility to be exploited locally, but free on line services also exist, like Kaggle or Google Colaboratory.
 
-Coding with PyCUDA occurs without significant loss of performance due to the use of a high lever language. Indeed, acceleration using GPU parallel programming occurs by splitting the code into a sequential or mildly parallelizable part to be executed on a (possibly multicore) CPU and into a massively parallelizable part to be executed on GPU. Typically, the CPU is just a controller which schedules the GPU executions so that there is no significant penalty when using Python. Opposite to that, GPU coding can be worked out directly using CUDA.
+Coding with PyCUDA occurs without significant loss of performance due to the use of a high level language. Indeed, acceleration using GPU parallel programming occurs by splitting the code into a sequential or mildly 
+parallelizable part to be executed on a (possibly multicore) CPU and into a massively parallelizable part to be executed on GPU. Typically, the CPU is just a controller which schedules the GPU executions so that there is no 
+significant penalty when using Python. Opposite to that, GPU coding can be worked out directly using CUDA.
 
-PyCUDA is documented at the PyCUDA homepage which contains also a tutorial, it has a GitHub page where the source code is available and issues are discussed and some useful examples are available . This notwithstanding, a didactic getting started guide is missing. Therefore, I decided to contribute to the topic with this post having the aim of providing a smooth introduction to coding in PyCUDA. To this end, I will discuss five different ways to implement the classical example by which parallel programming on GPU is taught, namely, the elementwise sum of two vectors, an operation very common in scientific computing.
+PyCUDA is documented at the PyCUDA homepage which contains also a tutorial, it has a GitHub page where the source code is available and issues are discussed and some useful examples are available . This notwithstanding, 
+a didactic getting started guide is missing. Therefore, we decided to contribute to the topic with this post having the aim of providing a smooth introduction to coding in PyCUDA. To this end, we will discuss five different 
+ways to implement the classical example by which parallel programming on GPU is taught, namely, the elementwise sum of two vectors, an operation very common in scientific computing.
 
 Basics of CUDA programming and of Python coding will be assumed. CUDA basics prerequisites can be reached by the classical CUDA By Example book.
 
-To form the five examples, I will consider different possibilities offered by PyCUDA, namely, using:
+To form the five examples, we will consider different possibilities offered by PyCUDA, namely, using:
 
-the SourceModule module;
-the ElementwiseKernel module;
-the elementwise sum of two gpuarray’s.
-Different possibilities may have different performance. For this reason, I will assess the performance of each version by the execution times on a Maxwell GeForce GTX 960 GPU.
+the `SourceModule` module;
+the `ElementwiseKernel` module;
+the elementwise sum of two `gpuarray`’s.
 
+Different possibilities may have different performance. For this reason, we will assess the performance of each version by the execution times on a Google Colab's Tesla T4 GPU.
 
-Version 1: using SourceModule
+#Version 1: using `SourceModule`#
 The module SourceModule enables coding GPU processing directly using CUDA __global__ functions and to execute the kernels by specifying the launch grid.
 
 In the code below, SourceModule is imported at line 6.
