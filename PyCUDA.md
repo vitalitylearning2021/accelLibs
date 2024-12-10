@@ -106,13 +106,40 @@ else :
 cuda.Context.synchronize()
 ```
 
-In the code above, `SourceModule` is imported at line 6.
+In the code above, `SourceModule` is imported at the following line:
 
-Lines 11 and 12 define the `iDivUp` function which is the analogous of the `iDivUp` function typically used in CUDA/C/C++ codes (see High Performance Programming for Soft Computing, page 103). It is used to define the number of blocks in the launch grid.
+```python
+from pycuda.compiler import SourceModule
+```
 
-Lines 18 and 19 define CUDA events (see CUDA By Example) which will be subsequently used, on lines 56 and 58–61, to evaluate the execution times.
+Then, the `iDivUp` function, which is the analogous of the `iDivUp` function typically used in CUDA/C/C++ codes (see High Performance Programming for Soft Computing, page 103), is defined; it is used to define the number of blocks in the launch grid:
 
-Later on, line 21 defines the number of vector elements and line 23 the size (`BLOCKSIZE`) of each execution block.
+```python
+def iDivUp(a, b):
+    # Round a / b to nearest higher integer value
+    a = np.int32(a)
+    b = np.int32(b)
+    return (a / b + 1) if (a % b != 0) else (a / b)
+```
+
+CUDA events (see CUDA By Example), which will be subsequently used to evaluate the execution times, are set as
+
+```python
+start = cuda.Event()
+end   = cuda.Event()
+```
+
+Later on, the number of vector elements is fixed
+
+```python
+N = 100000
+```
+
+as well as the size (`BLOCKSIZE`) of each execution block:
+
+```python
+BLOCKSIZE = 256
+```
 
 Lines 25–31 define, through the numpy library, the two random CPU vectors (`h_a` and `h_b`) to be transferred to GPU and summed thereon.
 
