@@ -50,7 +50,7 @@ Finally, line 73 has no effect in this code, but is kept for convenience. Whenev
 
 The processing time of the elementwise sum has been 0.0014ms.
 
-```python
+```python{.python .numberLines .lineAnchors}
 import numpy as np
 
 # --- PyCUDA initialization
