@@ -112,7 +112,7 @@ In the code above, `SourceModule` is imported at the following line:
 from pycuda.compiler import SourceModule
 ```
 
-Then, the `iDivUp` function, which is the analogous of the `iDivUp` function typically used in CUDA/C/C++ codes (see High Performance Programming for Soft Computing, page 103), is defined; it is used to define the number of blocks in the launch grid:
+Then, the `iDivUp` function, which is the analogous of the `iDivUp` function typically used in CUDA/C/C++ codes (see High Performance Programming for Soft Computing, page 103), is defined; it is used to compute the number of blocks in the launch grid:
 
 ```python
 def iDivUp(a, b):
@@ -122,7 +122,7 @@ def iDivUp(a, b):
     return (a / b + 1) if (a % b != 0) else (a / b)
 ```
 
-CUDA events (see CUDA By Example), which will be subsequently used to evaluate the execution times, are set as
+CUDA events (see CUDA By Example), which will be subsequently used to evaluate the execution times, are set as:
 
 ```python
 start = cuda.Event()
@@ -141,9 +141,36 @@ as well as the size (`BLOCKSIZE`) of each execution block:
 BLOCKSIZE = 256
 ```
 
-Lines 25–31 define, through the numpy library, the two random CPU vectors (`h_a` and `h_b`) to be transferred to GPU and summed thereon.
+The following lines define, through the `numpy` library, the two random CPU vectors (`h_a` and `h_b`) to be transferred to GPU and summed thereon.
 
-On the GPU, the space for these random vectors is allocated by the `mem_alloc` method of the `cuda.driver` at rows 34–36. Note that line 36 also allocates the global memory space to contain the results of the computations. The CPU-to-GPU memory transfers are executed at rows 39–40 by `memcpy_htod`. There also exist other possibilities to implement allocations and copies. One of these is offered by the `gpuArray` class and an example will be illustrated next, while another possibility is to link the CUDA runtime library (`cudart.dll`) and directly use its unwrapped functions, but this latter option is off topic for this post.
+```python
+# --- Create random vectorson the CPU
+h_a = np.random.randn(1, N)
+h_b = np.random.randn(1, N)
+
+# --- Set CPU arrays as single precision
+h_a = h_a.astype(np.float32)
+h_b = h_b.astype(np.float32)
+```
+
+On the GPU, the space for these random vectors is allocated by the `mem_alloc` method of the `cuda.driver`:
+
+```python
+# --- Allocate GPU device memory
+d_a = cuda.mem_alloc(h_a.nbytes)
+d_b = cuda.mem_alloc(h_b.nbytes)
+d_c = cuda.mem_alloc(h_a.nbytes)
+```
+
+Note that global memory space to contain the results of the computations is also allocated. The CPU-to-GPU memory transfers are executed by `memcpy_htod` as:
+
+```python
+# --- Memcopy from host to device
+cuda.memcpy_htod(d_a, h_a)
+cuda.memcpy_htod(d_b, h_b)
+```
+
+. There also exist other possibilities to implement allocations and copies. One of these is offered by the `gpuArray` class and an example will be illustrated next, while another possibility is to link the CUDA runtime library (`cudart.dll`) and directly use its unwrapped functions, but this latter option is off topic for this post.
 
 Rows 42–50 define the deviceAdd `__global__` function appointed to perform the elementwise sum, row 53 defines a reference to `deviceAdd`, rows 54–55 define the launch grid while line 57 invokes the relevant `__global__` function. Lines 64–65 allow the allocation of CPU memory space to store the results and the GPU-to-CPU memory transfers.
 
