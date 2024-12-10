@@ -30,26 +30,6 @@ Different possibilities may have different performance. For this reason, we will
 ### Version 1: using `SourceModule`
 The module `SourceModule` enables coding GPU processing directly using CUDA `__global__` functions and to execute the kernels by specifying the launch grid.
 
-In the code below, `SourceModule` is imported at line 6.
-
-Lines 11 and 12 define the `iDivUp` function which is the analogous of the `iDivUp` function typically used in CUDA/C/C++ codes (see High Performance Programming for Soft Computing, page 103). It is used to define the number of blocks in the launch grid.
-
-Lines 18 and 19 define CUDA events (see CUDA By Example) which will be subsequently used, on lines 56 and 58–61, to evaluate the execution times.
-
-Later on, line 21 defines the number of vector elements and line 23 the size (`BLOCKSIZE`) of each execution block.
-
-Lines 25–31 define, through the numpy library, the two random CPU vectors (`h_a` and `h_b`) to be transferred to GPU and summed thereon.
-
-On the GPU, the space for these random vectors is allocated by the `mem_alloc` method of the `cuda.driver` at rows 34–36. Note that line 36 also allocates the global memory space to contain the results of the computations. The CPU-to-GPU memory transfers are executed at rows 39–40 by `memcpy_htod`. There also exist other possibilities to implement allocations and copies. One of these is offered by the `gpuArray` class and an example will be illustrated next, while another possibility is to link the CUDA runtime library (`cudart.dll`) and directly use its unwrapped functions, but this latter option is off topic for this post.
-
-Rows 42–50 define the deviceAdd `__global__` function appointed to perform the elementwise sum, row 53 defines a reference to `deviceAdd`, rows 54–55 define the launch grid while line 57 invokes the relevant `__global__` function. Lines 64–65 allow the allocation of CPU memory space to store the results and the GPU-to-CPU memory transfers.
-
-Finally, rows 67–70 check whether the GPU computation is correct by comparing the results with an analogous CPU computation.
-
-Finally, line 73 has no effect in this code, but is kept for convenience. Whenever one decides to test the code into an interactive python shell and to use `printf()` within the `__global__` function, such instructions would enable the flush of the `printf()` buffer. Without those, into an interactive, the `printf()` whould have no effect into an interactive python shell.
-
-The processing time of the elementwise sum has been 0.0014ms.
-
 ```python
 import numpy as np
 
@@ -125,6 +105,28 @@ else :
 # --- Flush context printf buffer
 cuda.Context.synchronize()
 ```
+
+In the code above, `SourceModule` is imported at line 6.
+
+Lines 11 and 12 define the `iDivUp` function which is the analogous of the `iDivUp` function typically used in CUDA/C/C++ codes (see High Performance Programming for Soft Computing, page 103). It is used to define the number of blocks in the launch grid.
+
+Lines 18 and 19 define CUDA events (see CUDA By Example) which will be subsequently used, on lines 56 and 58–61, to evaluate the execution times.
+
+Later on, line 21 defines the number of vector elements and line 23 the size (`BLOCKSIZE`) of each execution block.
+
+Lines 25–31 define, through the numpy library, the two random CPU vectors (`h_a` and `h_b`) to be transferred to GPU and summed thereon.
+
+On the GPU, the space for these random vectors is allocated by the `mem_alloc` method of the `cuda.driver` at rows 34–36. Note that line 36 also allocates the global memory space to contain the results of the computations. The CPU-to-GPU memory transfers are executed at rows 39–40 by `memcpy_htod`. There also exist other possibilities to implement allocations and copies. One of these is offered by the `gpuArray` class and an example will be illustrated next, while another possibility is to link the CUDA runtime library (`cudart.dll`) and directly use its unwrapped functions, but this latter option is off topic for this post.
+
+Rows 42–50 define the deviceAdd `__global__` function appointed to perform the elementwise sum, row 53 defines a reference to `deviceAdd`, rows 54–55 define the launch grid while line 57 invokes the relevant `__global__` function. Lines 64–65 allow the allocation of CPU memory space to store the results and the GPU-to-CPU memory transfers.
+
+Finally, rows 67–70 check whether the GPU computation is correct by comparing the results with an analogous CPU computation.
+
+Finally, line 73 has no effect in this code, but is kept for convenience. Whenever one decides to test the code into an interactive python shell and to use `printf()` within the `__global__` function, such instructions would enable the flush of the `printf()` buffer. Without those, into an interactive, the `printf()` whould have no effect into an interactive python shell.
+
+The processing time of the elementwise sum has been 0.0014ms.
+
+
 
 ---
 
