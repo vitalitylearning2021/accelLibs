@@ -50,7 +50,7 @@ Finally, line 73 has no effect in this code, but is kept for convenience. Whenev
 
 The processing time of the elementwise sum has been 0.0014ms.
 
-<script>
+```python
 import numpy as np
 
 # --- PyCUDA initialization
@@ -67,7 +67,7 @@ def iDivUp(a, b):
 ########
 # MAIN #
 ########
-</script>
+```
 
 ---
 
