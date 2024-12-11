@@ -31,21 +31,6 @@ Different possibilities may have different performance. For this reason, we will
 The module `SourceModule` enables coding GPU processing directly using CUDA `__global__` functions and to execute the kernels by specifying the launch grid.
 
 ```python
-# PyCUDA installation
-
-
-!pip install pycuda
-
-
-
----
-
-
-
-# Version #1: using ```SourceModule```
-
-PyCUDA initialization
-
 import numpy as np
 
 # --- PyCUDA initialization
