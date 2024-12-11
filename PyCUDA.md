@@ -31,6 +31,21 @@ Different possibilities may have different performance. For this reason, we will
 The module `SourceModule` enables coding GPU processing directly using CUDA `__global__` functions and to execute the kernels by specifying the launch grid.
 
 ```python
+# PyCUDA installation
+
+
+!pip install pycuda
+
+
+
+---
+
+
+
+# Version #1: using ```SourceModule```
+
+PyCUDA initialization
+
 import numpy as np
 
 # --- PyCUDA initialization
@@ -42,7 +57,10 @@ from pycuda.compiler import SourceModule
 # iDivUp FUNCTION #
 ###################
 def iDivUp(a, b):
-    return a // b + 1
+    # Round a / b to nearest higher integer value
+    a = np.int32(a)
+    b = np.int32(b)
+    return (a / b + 1) if (a % b != 0) else (a / b)
 
 ########
 # MAIN #
@@ -55,20 +73,16 @@ N = 100000
 
 BLOCKSIZE = 256
 
-# --- Create random vectorson the CPU
 h_a = np.random.randn(1, N)
 h_b = np.random.randn(1, N)
 
-# --- Set CPU arrays as single precision
 h_a = h_a.astype(np.float32)
 h_b = h_b.astype(np.float32)
 
-# --- Allocate GPU device memory
 d_a = cuda.mem_alloc(h_a.nbytes)
 d_b = cuda.mem_alloc(h_b.nbytes)
 d_c = cuda.mem_alloc(h_a.nbytes)
 
-# --- Memcopy from host to device
 cuda.memcpy_htod(d_a, h_a)
 cuda.memcpy_htod(d_b, h_b)
 
@@ -82,10 +96,14 @@ mod = SourceModule("""
   } 
   """)
 
-# --- Define a reference to the __global__ function and call it
 deviceAdd = mod.get_function("deviceAdd")
+
 blockDim  = (BLOCKSIZE, 1, 1)
-gridDim   = (iDivUp(N, BLOCKSIZE), 1, 1)
+gridDim   = (int(iDivUp(N, BLOCKSIZE)), 1, 1)
+
+# --- Warmup execution
+deviceAdd(d_c, d_a, d_b, np.int32(N), block = blockDim, grid = gridDim)
+
 start.record()
 deviceAdd(d_c, d_a, d_b, np.int32(N), block = blockDim, grid = gridDim)
 end.record() 
@@ -93,7 +111,6 @@ end.synchronize()
 secs = start.time_till(end) * 1e-3
 print("Processing time = %fs" % (secs))
 
-# --- Copy results from device to host
 h_c = np.empty_like(h_a)
 cuda.memcpy_dtoh(h_c, d_c)
 
@@ -102,7 +119,6 @@ if np.array_equal(h_c, h_a + h_b):
 else :
   print("Error!")
 
-# --- Flush context printf buffer
 cuda.Context.synchronize()
 ```
 
@@ -170,22 +186,72 @@ cuda.memcpy_htod(d_a, h_a)
 cuda.memcpy_htod(d_b, h_b)
 ```
 
-. There also exist other possibilities to implement allocations and copies. One of these is offered by the `gpuArray` class and an example will be illustrated next, while another possibility is to link the CUDA runtime library (`cudart.dll`) and directly use its unwrapped functions, but this latter option is off topic for this post.
+There also exist other possibilities to implement allocations and copies. One of these is offered by the `gpuArray` class and an example will be illustrated next, while another possibility is to link the CUDA runtime library (`cudart.dll`) and directly use its unwrapped functions, but this latter option is off topic for this post.
 
-Rows 42–50 define the deviceAdd `__global__` function appointed to perform the elementwise sum, row 53 defines a reference to `deviceAdd`, rows 54–55 define the launch grid while line 57 invokes the relevant `__global__` function. Lines 64–65 allow the allocation of CPU memory space to store the results and the GPU-to-CPU memory transfers.
+The following rows
 
-Finally, rows 67–70 check whether the GPU computation is correct by comparing the results with an analogous CPU computation.
+```python
+mod = SourceModule("""
+  #include <stdio.h>
+  __global__ void deviceAdd(float * __restrict__ d_c, const float * __restrict__ d_a, const float * __restrict__ d_b, const int N)
+  {
+    const int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    if (tid >= N) return;
+    d_c[tid] = d_a[tid] + d_b[tid];
+  } 
+  """)
+```
 
-Finally, line 73 has no effect in this code, but is kept for convenience. Whenever one decides to test the code into an interactive python shell and to use `printf()` within the `__global__` function, such instructions would enable the flush of the `printf()` buffer. Without those, into an interactive, the `printf()` whould have no effect into an interactive python shell.
+define the deviceAdd `__global__` function appointed to perform the elementwise sum, while 
 
-The processing time of the elementwise sum has been 0.0014ms.
+```python
+deviceAdd = mod.get_function("deviceAdd")
+```
 
+defines a reference to `deviceAdd`. The launch grid is set as
 
+```python
+blockDim  = (BLOCKSIZE, 1, 1)
+gridDim   = (iDivUp(N, BLOCKSIZE), 1, 1)
+```
+
+while 
+
+```python
+deviceAdd(d_c, d_a, d_b, np.int32(N), block = blockDim, grid = gridDim)
+```
+
+invokes the relevant `__global__` function. 
+
+The following lines
+
+```python
+h_c = np.empty_like(h_a)
+cuda.memcpy_dtoh(h_c, d_c)
+```
+
+allow the allocation of CPU memory space to store the results and the GPU-to-CPU memory transfers. Finally, rows
+
+```python
+if np.array_equal(h_c, h_a + h_b):
+  print("Test passed!")
+else :
+  print("Error!")
+```
+
+check whether the GPU computation is correct by comparing the results with an analogous CPU computation.
+
+Line
+
+```python
+cuda.Context.synchronize()
+```
+
+has no effect in this code, but is kept for convenience. Whenever one decides to test the code into an interactive python shell and to use `printf()` within the `__global__` function, such instructions would enable the flush of the `printf()` buffer. Without those, the `printf()` whould have no effect into an interactive python shell.
 
 ---
 
-Version 1 using SourceModule
-Version 2: using SourceModule and copying data from host to device on-the-fly
+### Version 2: using `SourceModule` and copying data from host to device on-the-fly
 The second version is the same as the foregoing one with the only exception that the copies from host to the device and viceversa are not performed explicitly before the kernel launch, but rather implicitly. Implicit copies are executed on-the-fly by applying cuda.In to the host input arrays and cuda.Out to the output host array (see line 50).
 
 The code is now shorter, but simplicity is paid with execution times. Indeed, memory transfers now affect the computation time which becomes 0.957ms.
