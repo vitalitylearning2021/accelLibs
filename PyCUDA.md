@@ -234,6 +234,8 @@ cuda.Context.synchronize()
 
 has no effect in this code, but is kept for convenience. Whenever one decides to test the code into an interactive python shell and to use `printf()` within the `__global__` function, such instructions would enable the flush of the `printf()` buffer. Without those, the `printf()` whould have no effect into an interactive python shell.
 
+The processing time has been `0.000224s`.
+
 ---
 
 ### Version 2: using `SourceModule` and copying data from host to device on-the-fly
