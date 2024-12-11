@@ -239,9 +239,86 @@ The processing time has been `0.000224s`.
 ---
 
 ### Version 2: using `SourceModule` and copying data from host to device on-the-fly
-The second version is the same as the foregoing one with the only exception that the copies from host to the device and viceversa are not performed explicitly before the kernel launch, but rather implicitly. Implicit copies are executed on-the-fly by applying cuda.In to the host input arrays and cuda.Out to the output host array (see line 50).
+The second version is the same as the foregoing one with the only exception that the copies from host to the device and viceversa are not performed explicitly before the kernel launch, but rather implicitly. 
 
-The code is now shorter, but simplicity is paid with execution times. Indeed, memory transfers now affect the computation time which becomes 0.957ms.
+```python
+import numpy as np
+
+import pycuda.driver as cuda
+import pycuda.autoinit
+from pycuda.compiler import SourceModule
+
+###################
+# iDivUp FUNCTION #
+###################
+def iDivUp(a, b):
+    # Round a / b to nearest higher integer value
+    a = np.int32(a)
+    b = np.int32(b)
+    return (a / b + 1) if (a % b != 0) else (a / b)
+
+########
+# MAIN #
+########
+
+start = cuda.Event()
+end   = cuda.Event()
+
+N = 100000
+
+BLOCKSIZE = 256
+
+h_a = np.random.randn(1, N)
+h_b = np.random.randn(1, N)
+
+h_a = h_a.astype(np.float32)
+h_b = h_b.astype(np.float32)
+h_c = np.empty_like(h_a)
+
+mod = SourceModule("""
+__global__ void deviceAdd(float * __restrict__ d_c, const float * __restrict__ d_a, 
+                                                    const float * __restrict__ d_b,
+                                                    const int N)
+{
+  const int tid = threadIdx.x + blockIdx.x * blockDim.x;
+  if (tid >= N) return;
+  d_c[tid] = d_a[tid] + d_b[tid];
+}
+""")
+
+deviceAdd = mod.get_function("deviceAdd")
+blockDim  = (BLOCKSIZE, 1, 1)
+gridDim   = (int(iDivUp(N, BLOCKSIZE)), 1, 1)
+
+The only difference with Version #1 is the use of ```cuda.In``` and ```cuda.Out``` when calling ```deviceAdd```. The former performs on-the-fly copies of ```h_a``` and ```h_b``` from host to device, while the latter copies the result of the processing to ```h_c```. This avoids the need of an explicit allocation of GPU memory space.
+
+# --- Warmup execution
+deviceAdd(cuda.Out(h_c), cuda.In(h_a), cuda.In(h_b), np.int32(N), block = blockDim, grid = gridDim)
+
+start.record()
+deviceAdd(cuda.Out(h_c), cuda.In(h_a), cuda.In(h_b), np.int32(N), block = blockDim, grid = gridDim)
+end.record() 
+end.synchronize()
+secs = start.time_till(end) * 1e-3
+print("Processing time = %fs" % (secs))
+
+The last code portion is again the same as for Version #1.
+
+if np.array_equal(h_c, h_a + h_b):
+  print("Test passed!")
+else :
+  print("Error!")
+
+cuda.Context.synchronize()
+```
+
+Implicit copies are executed on-the-fly by applying `cuda.In` to the host input arrays and `cuda.Out` to the output host array:
+
+```python
+deviceAdd(cuda.Out(h_c), cuda.In(h_a), cuda.In(h_b), np.int32(N), block = blockDim, grid = gridDim)
+```
+
+The code is now shorter, but simplicity is paid with execution times. Indeed, memory transfers now affect the computation time which becomes `0.957ms`.
 
 
 Version 2 using SourceModule and copying data from host to device on-the-fly
