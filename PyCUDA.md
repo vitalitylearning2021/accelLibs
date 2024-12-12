@@ -318,11 +318,11 @@ Implicit copies are executed on-the-fly by applying `cuda.In` to the host input 
 deviceAdd(cuda.Out(h_c), cuda.In(h_a), cuda.In(h_b), np.int32(N), block = blockDim, grid = gridDim)
 ```
 
-The code is now shorter, but simplicity is paid with execution times. Indeed, memory transfers now affect the computation time which becomes `0.957ms`.
+The code is now shorter, but simplicity is paid with execution times. Indeed, memory transfers now affect the computation time which becomes `0.000948s`.
 
+---
 
-Version 2 using SourceModule and copying data from host to device on-the-fly
-Version 3: using gpuArrays
+### Version 3: using `gpuArrays`
 In the third version, GPU arrays are dealt with by the gpuarray class. The elementwise sum is then performed by using the possibility offered by such a class of expressing array operations on the GPU with the classical numpy array syntax without explicitly coding a __global__ function and using SourceModule.
 
 As compared to the first version, we have now a timing penalty since the elementwise execution requires 1.014ms.
