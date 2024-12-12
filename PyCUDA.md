@@ -322,14 +322,63 @@ The code is now shorter, but simplicity is paid with execution times. Indeed, me
 
 ---
 
-### Version 3: using `gpuArrays`
-In the third version, GPU arrays are dealt with by the gpuarray class. The elementwise sum is then performed by using the possibility offered by such a class of expressing array operations on the GPU with the classical numpy array syntax without explicitly coding a __global__ function and using SourceModule.
+### Version 3: using `gpuArray`'s
+In the third version, GPU arrays are dealt with by the `gpuarray` class. The elementwise sum is then performed by using the possibility offered by such a class of expressing array operations on the GPU with the classical `numpy` array syntax without explicitly coding a `__global__` function and using `SourceModule`.
+
+```python
+import numpy as np
+
+# --- PyCUDA initialization
+import pycuda.gpuarray as gpuarray
+import pycuda.driver as cuda
+import pycuda.autoinit
+
+########
+# MAIN #
+########
+
+start = cuda.Event()
+end   = cuda.Event()
+
+N = 100000
+
+h_a = np.random.randn(1, N)
+h_b = np.random.randn(1, N)
+
+h_a = h_a.astype(np.float32)
+h_b = h_b.astype(np.float32)
+h_c = np.empty_like(h_a)
+
+d_a = gpuarray.to_gpu(h_a)
+d_b = gpuarray.to_gpu(h_b)
+
+# --- Warmup execution
+d_c = (d_a + d_b)
+
+start.record()
+d_c = (d_a + d_b)
+end.record() 
+end.synchronize()
+secs = start.time_till(end) * 1e-3
+print("Processing time = %fs" % (secs))
+
+h_c = d_c.get()
+
+This last part is the same as for the previous versions.
+
+if np.array_equal(h_c, h_a + h_b):
+  print("Test passed!")
+else :
+  print("Error!")
+
+cuda.Context.synchronize()
+```
 
 As compared to the first version, we have now a timing penalty since the elementwise execution requires 1.014ms.
 
+---
 
-Version 3 using gpuarrays
-Version 4: using ElementwiseKernel
+### Version 4: using `ElementwiseKernel`
 The PyCUDA ElementwiseKernel class allows to define snippets of C code to be executed elementwise. Since the __global__ deviceAdd function contains operations to be executed elementwise on the involved vectors, we are suggested to replace the use of SourceModule with ElementwiseKernel.
 
 The code below reported conceptually represents version 1 with SourceModule replaced with ElementwiseKernel. Actually, now a linear combination of the involved vectors instead of a simple elementwise sum is performed. Lines 30–33 define the elementwise linear combination function lin_comb while line 36 calls it. In this way, it is also possible to illustrate how passing constant values.
