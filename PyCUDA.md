@@ -364,8 +364,6 @@ print("Processing time = %fs" % (secs))
 
 h_c = d_c.get()
 
-This last part is the same as for the previous versions.
-
 if np.array_equal(h_c, h_a + h_b):
   print("Test passed!")
 else :
@@ -374,19 +372,90 @@ else :
 cuda.Context.synchronize()
 ```
 
-As compared to the first version, we have now a timing penalty since the elementwise execution requires 1.014ms.
+As compared to the first version, we have now a timing penalty since the elementwise execution requires `0.000420s`.
 
 ---
 
 ### Version 4: using `ElementwiseKernel`
-The PyCUDA ElementwiseKernel class allows to define snippets of C code to be executed elementwise. Since the __global__ deviceAdd function contains operations to be executed elementwise on the involved vectors, we are suggested to replace the use of SourceModule with ElementwiseKernel.
+The PyCUDA `ElementwiseKernel` class allows to define snippets of C code to be executed elementwise. Since the `__global__ deviceAdd` function contains operations to be executed elementwise on the involved vectors, we are suggested to replace the use of `SourceModule` with `ElementwiseKernel`.
 
-The code below reported conceptually represents version 1 with SourceModule replaced with ElementwiseKernel. Actually, now a linear combination of the involved vectors instead of a simple elementwise sum is performed. Lines 30–33 define the elementwise linear combination function lin_comb while line 36 calls it. In this way, it is also possible to illustrate how passing constant values.
+```python
+import numpy as np
 
-The computation time is 0.1034ms so that, as compared to version 1, ElementwiseKernel seems to give rise to a loss of performance as compared to SourceModule.
+import pycuda.driver as cuda
+import pycuda.autoinit
+import pycuda.gpuarray as gpuarray
 
-It is nevertheless possible to check that the additional overhead brought by the linear combination is irrelevant. Actually, as compared to version 1, in version 4 the vectors are dealt with by the gpuarray class, while in version 1 the global memory allocation was performed by mem_alloc. gpuarray may than be suspected to be the responsible of the additional overhead. Actually, this is not the case as shown by the code in version 5.
+########
+# MAIN #
+########
 
+start = cuda.Event()
+end   = cuda.Event()
+
+N = 100000
+
+h_a = np.random.randn(1, N)
+h_b = np.random.randn(1, N)
+
+h_a = h_a.astype(np.float32)
+h_b = h_b.astype(np.float32)
+
+d_a = gpuarray.to_gpu(h_a)
+d_b = gpuarray.to_gpu(h_b)
+
+In this example, ```d_c``` is explicitly defined. This is necessary for the use of the ```ElementwiseKernel``` module.
+
+d_c = gpuarray.empty_like(d_a)
+
+Load the ```ElementwiseKernel``` module.
+
+from pycuda.elementwise import ElementwiseKernel
+
+lin_comb = ElementwiseKernel(
+        "float *d_c, float *d_a, float *d_b, float a, float b",
+        "d_c[i] = a * d_a[i] + b * d_b[i]")
+
+# --- Warmup execution
+lin_comb(d_c, d_a, d_b, 2, 3)
+
+start.record()
+lin_comb(d_c, d_a, d_b, 2, 3)
+end.record()
+end.synchronize()
+secs = start.time_till(end) * 1e-3
+print("Processing time = %fs" % (secs))
+
+h_c = d_c.get()
+
+if np.array_equal(h_c, 2 * h_a + 3 * h_b):
+  print("Test passed!")
+else :
+  print("Error!")
+
+cuda.Context.synchronize()
+```
+
+The code above conceptually represents version 1 with `SourceModule` replaced with `ElementwiseKernel`. Actually, now a linear combination of the involved vectors instead of a simple elementwise sum is performed. The lines 
+
+```python
+lin_comb = ElementwiseKernel(
+        "float *d_c, float *d_a, float *d_b, float a, float b",
+        "d_c[i] = a * d_a[i] + b * d_b[i]",
+        "linear_combination")
+```
+
+define the elementwise linear combination function `lin_comb` while line 
+
+```python
+lin_comb(d_c, d_a, d_b, 2, 3)
+```
+
+calls it. In this way, it is also possible to illustrate how passing constant values.
+
+The computation time is `0.000220s` so that, as compared to version 1, `ElementwiseKernel` seems not to give rise to a loss of performance as compared to `SourceModule`.
+
+---
 
 Version 4 using ElementwiseKernel
 Version 5: using SourceModule while handling vectors by gpuArray
