@@ -19,7 +19,7 @@ Numba is a powerful Python library designed to accelerate numerical computations
 
 ### Version 1: writing CUDA kernels as JIT functions
 
-CUDA kernels can be written as Python functions exploiting the JIT mechanism, as illustrated by the code below. 
+This example is the corresponding example to Version 1 in [Five different ways to sum vectors in PyCUDA](PyCUDA.md). CUDA kernels can be written as Python functions exploiting the JIT mechanism, as illustrated by the code below. 
 
 ```python
 import numpy as np
