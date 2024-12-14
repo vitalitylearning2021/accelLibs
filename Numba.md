@@ -1,6 +1,6 @@
 ---
 layout: default
-title: A couple of ways to sum vectors in Numba
+title: Summing vectors in Numba
 ---
 
 Numba is a powerful Python library designed to accelerate numerical computations by compiling Python code to optimized machine code at runtime. It uses the `LLVM` compiler infrastructure to target CPUs and GPUs, making it an excellent tool for data-intensive tasks. With its straightforward syntax, Numba enables developers to write GPU-accelerated programs in Python, eliminating the need to work directly with low-level languages like C or CUDA.
@@ -17,7 +17,7 @@ Numba is a powerful Python library designed to accelerate numerical computations
 - *Thread Management*: Developers can manage grid and block dimensions to optimize GPU usage.
 - *Device-Specific Functions*: Numba provides access to low-level GPU functions like shared memory and synchronization primitives.
 
-### Version 1: writing CUDA kernels as JIT functions
+### Summing vectors in Numba: writing CUDA kernels as JIT functions
 
 This example is the corresponding example to Version 1 in [Five different ways to sum vectors in PyCUDA](PyCUDA.md). CUDA kernels can be written as Python functions exploiting the JIT mechanism, as illustrated by the code below. 
 
