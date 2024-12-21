@@ -1,4 +1,4 @@
-### Acceleration Libraries for CUDA
+### [Acceleration Libraries for CUDA](https://vitalitylearning2021.github.io/accelLibs/)
 
 This repository showcases practical examples of how using PyCUDA and Numba, two powerful tools for GPU programming with Python. Whether you're exploring the flexibility of PyCUDA or the simplicity of Numba's Python-native syntax, you'll find detailed examples and explanations to help you harness the computational power of CUDA.
 
